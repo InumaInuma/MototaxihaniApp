@@ -1,10 +1,31 @@
 const nodemailer = require('nodemailer');
+const { google } = require("googleapis");
+const OAuth2 = google.auth.OAuth2;
+
 const accountTransport = require("./account_transport.json");
 
-const mail_rover = nodemailer.createTransport(accountTransport);
+const mail_rover = async (callback) => {
+    const oauth2Client = new OAuth2(
+        accountTransport.auth.clientId,
+        accountTransport.auth.clientSecret,
+        "https://developers.google.com/oauthplayground",
+    );
+    oauth2Client.setCredentials({
+        refresh_token: accountTransport.auth.refreshToken,
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
+    oauth2Client.getAccessToken((err, token) => {
+        if (err)
+            return console.log(err);;
+        accountTransport.auth.accessToken = token;
+        callback(nodemailer.createTransport(accountTransport));
+    });
+};
 
 const authorization1
-    = 'key=AAAAPO-8k3I:APA91bFplhB8nkZVO_712SBF-A5NsW21cyv7OfGxOdpXClp3kmKu3zKL3BIh9BZ-Z5o_GUwpBws9oOk8pu15c9S6ukcCMrvP7nYpDkUY9DCFBcY4n-W-Hmw9RdI9O5lUQauIGgWgLHIp';
+    = 'key=AAAA86Jpmc4:APA91bGtkyICj-1orznnISq8WLuHuR9myfELg-uRaerCynlf3KC9gCZJDFimIfME5yFr5n5Nvr8s7V4piYW8Vz7iUG0p0Yb1Gy7g7aX49q1470x5BRpU1s7bVvqbiyWbgH4qK2FVXypR';
 
 module.exports = {
     auth, dir, send, restringirApp, code_PMZ, key_PMZ, nombre, isExplorer
@@ -126,32 +147,34 @@ function dir(idaplicativo) {
 
 //Envia un mail
 function send(idAplicativo, calback) {
-    var id = 0;
-    try {
-        var id = parseInt(idAplicativo);
-    } catch (error) {
-        console.log(`error parse idAplicativo feedback.js ${error}`)
-    }
-    switch (id) {
-        case _ID_APP_1:
-            json = {
-                url: _SERVER + 'curiosity/', mail: mail_rover, app: 'CURIOSITY', from: 'Curiosity <curiosity@planck.biz>',
-                to: 'CURIOSITY <curiosity@planck.biz>',
-                slogan: '😋 Comida exquisita, entregas simples. 🛵 Compra YA! 👇🏻',
-                body_bienvanida: 'Mensaje personalizado', head_bienvanida: 'En Curiosity pide a tu local favorito, o chatea con un asesor por medicina, y te lo llevamos lo antes posible.',
-                bcc: 'Info <info@planck.biz>', head: head, footer: footer
-            };
-            return calback(json);
-        default:
-            json = {
-                url: _SERVER + 'curiosity/', mail: mail_rover, app: 'CURIOSITY', from: 'Curiosity <curiosity@planck.biz>',
-                to: 'CURIOSITY <curiosity@planck.biz>',
-                slogan: '😋 Comida exquisita, entregas simples. 🛵 Compra YA! 👇🏻',
-                body_bienvanida: 'Mensaje personalizado', head_bienvanida: 'En Curiosity pide a tu local favorito, o chatea con un asesor por medicina, y te lo llevamos lo antes posible.',
-                bcc: 'Info <info@planck.biz>', head: head, footer: footer
-            };
-            return calback(json);
-    }
+    mail_rover(function (emailTransporter) {
+        var id = 0;
+        try {
+            var id = parseInt(idAplicativo);
+        } catch (error) {
+            console.log(`error parse idAplicativo feedback.js ${error}`)
+        }
+        switch (id) {
+            case _ID_APP_1:
+                json = {
+                    url: _SERVER + 'curiosity/', mail: emailTransporter, app: 'CURIOSITY', from: 'Curiosity <curiosity@planck.biz>',
+                    to: 'CURIOSITY <curiosity@planck.biz>',
+                    slogan: '😋 Comida exquisita, entregas simples. 🛵 Compra YA! 👇🏻',
+                    body_bienvanida: 'Mensaje personalizado', head_bienvanida: 'En Curiosity pide a tu local favorito, o chatea con un asesor por medicina, y te lo llevamos lo antes posible.',
+                    bcc: 'Info <info@planck.biz>', head: head, footer: footer
+                };
+                return calback(json);
+            default:
+                json = {
+                    url: _SERVER + 'curiosity/', mail: emailTransporter, app: 'CURIOSITY', from: 'Curiosity <curiosity@planck.biz>',
+                    to: 'CURIOSITY <curiosity@planck.biz>',
+                    slogan: '😋 Comida exquisita, entregas simples. 🛵 Compra YA! 👇🏻',
+                    body_bienvanida: 'Mensaje personalizado', head_bienvanida: 'En Curiosity pide a tu local favorito, o chatea con un asesor por medicina, y te lo llevamos lo antes posible.',
+                    bcc: 'Info <info@planck.biz>', head: head, footer: footer
+                };
+                return calback(json);
+        }
+    });
 }
 
 var head =
