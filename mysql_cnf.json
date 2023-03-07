@@ -1,0 +1,8 @@
+{
+    "host": "10.128.0.4",
+    "user": "node1",
+    "password": "InumaTic2023*",
+    "connectionLimit": 10,
+    "multipleStatements": false,
+    "charset": "utf8mb4"
+}
